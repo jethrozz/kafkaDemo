@@ -26,14 +26,20 @@ public class Test {
             public void run() {
                 while (true){
                     kafkaSender.send();
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
 
         KafkaReceiver kafkaConsumer1 = new KafkaReceiver("C1",true);
-        KafkaReceiver kafkaConsumer2 = new KafkaReceiver("C2",true);
+       // KafkaReceiver kafkaConsumer2 = new KafkaReceiver("C2",true);
+        //KafkaReceiver kafkaConsumer3 = new KafkaReceiver("C3",true);
 
-        th.start();
+        //th.start();
 
         Thread th2 = new Thread(new Runnable() {
             @Override
@@ -42,13 +48,9 @@ public class Test {
 
             }
         });
-        Thread th3 = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                kafkaConsumer2.receive();
-            }
-        });
-        th2.start();
-        th3.start();
+
+       // th2.start();
+
+        kafkaConsumer1.close();
     }
 }

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.kafka.bean.IConfig;
 import com.kafka.bean.KafkaMessage;
+import com.kafka.bean.MessageSerializer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.producer.Callback;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -27,7 +28,7 @@ import java.util.UUID;
 
 @Slf4j
 public class KafkaSender implements Callback {
-    private  KafkaProducer<String, String> producer;
+    private  KafkaProducer<String, KafkaMessage> producer;
     private Properties getProducerProperties(){
         Properties props = new Properties();
         //broker地址：建立与集群的连接，通过一个broker会自动发现集群中其他的broker,不用把集群中所有的broker地址列全，一般配置2-3个即可
@@ -59,7 +60,7 @@ public class KafkaSender implements Callback {
         props.put("key.serializer", StringSerializer.class.getCanonicalName());
 
         //value序列化方式
-        props.put("value.serializer", StringSerializer.class.getCanonicalName());
+        props.put("value.serializer", MessageSerializer.class.getCanonicalName());
 
         //重新设置分区器
         //props.put("partitioner.class", CustomerPartitioner.class.getCanonicalName());
@@ -75,12 +76,18 @@ public class KafkaSender implements Callback {
 
     //发送消息方法
     public void send() {
-        ProducerRecord<String,String> record = new ProducerRecord<>(IConfig.TOPIC_NAME,"zxczxcz");
+        KafkaMessage message = new KafkaMessage();
+        message.setId(System.currentTimeMillis());
+        message.setMsg("123456");
+        message.setSendTime(new Date());
+        ProducerRecord<String,KafkaMessage> record = new ProducerRecord<String,KafkaMessage>(IConfig.TOPIC_NAME,message);
         producer.send(record);
+        //producer.close();
     }
 
-    public void send(ProducerRecord<String,String> record) {
+    public void send(ProducerRecord<String,KafkaMessage> record) {
         producer.send(record);
+        //producer.close();
     }
 
     @Override
@@ -90,7 +97,4 @@ public class KafkaSender implements Callback {
         }
     }
 
-    public void close(){
-        producer.close();
-    }
 }
